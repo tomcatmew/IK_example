@@ -1,0 +1,9 @@
+[submodule "3rd_party/delfem2"]
+	path = 3rd_party/delfem2
+	url = https://github.com/nobuyuki83/delfem2.git
+[submodule "3rd_party/glfw"]
+	path = 3rd_party/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "3rd_party/imgui"]
+	path = 3rd_party/imgui
+	url = https://github.com/ocornut/imgui.git
