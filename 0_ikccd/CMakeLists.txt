@@ -13,7 +13,7 @@ ENDIF ()
 
 ####################################
 
-project(Motion_Matching)
+project(0_IKccd)
 
 add_definitions(-DPATH_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
