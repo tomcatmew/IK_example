@@ -10,7 +10,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl2.h"
 
-#include "traj.h"
 #include "draw.h"
 #include "delfem2/rig_geo3.h"
 #include "delfem2/glfw/viewer3.h"
@@ -62,14 +61,14 @@ void SeparateZRot(
     //
     double det = qz[3] * qz[3] + qz[2] * qz[2];
     double invdet = 1 / det;
-    qxy[0] = (qz[3] * q[0] - qz[2] * q[1]) * invdet;
-    qxy[1] = (qz[2] * q[0] + qz[3] * q[1]) * invdet;
+    qxy[0] = (qz[3] * q[0] + qz[2] * q[1]) * invdet;
+    qxy[1] = (qz[3] * q[1] - qz[2] * q[0]) * invdet;
     qxy[2] = 0;
     //
 #ifndef NDEBUG
     assert(fabs(dfm2::Length_Quat(q) - 1.) < 1.0e-5);
     double qyqxz[4];
-    dfm2::QuatQuat(qyqxz, qz, qxz);
+    dfm2::QuatQuat(qyqxz, qz, qxy);
     assert(fabs(q[0] - qyqxz[0]) < 1.0e-10);
     assert(fabs(q[1] - qyqxz[1]) < 1.0e-10);
     assert(fabs(q[2] - qyqxz[2]) < 1.0e-10);
@@ -77,6 +76,32 @@ void SeparateZRot(
 #endif
 }
 
+void SeparateXRot(
+    double qx[4],
+    double qzy[4],
+    const double q[4]) {
+    qzy[3] = std::sqrt(q[3] * q[3] + q[0] * q[0]);
+    qx[0] = q[0] / qzy[3];
+    qx[1] = 0;
+    qx[2] = 0;
+    qx[3] = q[3] / qzy[3];
+    //
+    double det = qx[3] * qx[3] + qx[0] * qx[0];
+    double invdet = 1 / det;
+    qzy[0] = 0;
+    qzy[1] = (qx[3] * q[1] + qx[0] * q[2]) * invdet;
+    qzy[2] = (qx[3] * q[2] - qx[0] * q[1]) * invdet;
+    //
+#ifndef NDEBUG
+    assert(fabs(dfm2::Length_Quat(q) - 1.) < 1.0e-5);
+    double qyqxz[4];
+    dfm2::QuatQuat(qyqxz, qx, qzy);
+    assert(fabs(q[0] - qyqxz[0]) < 1.0e-10);
+    assert(fabs(q[1] - qyqxz[1]) < 1.0e-10);
+    assert(fabs(q[2] - qyqxz[2]) < 1.0e-10);
+    assert(fabs(q[3] - qyqxz[3]) < 1.0e-10);
+#endif
+}
 
 void draw_arrow(dfm2::CVec3d& p0, dfm2::CVec3d& p1)
 {
@@ -526,39 +551,55 @@ int main(int argc, char* argv[]) {
         0,0,0,
         0,0,0,
         0,0,0,
-        0,0,0,//1
-        -2,0,1,
-        -2,0,-1,
-        0,0,1,
-        0,0,-1,
-        0,6,1,
-        0,6,-1,
-        -2,6,1,
-        -2,6,-1,//2
-        0,0,1,
-        0,0,-1,
-        2,0,1,
-        2,0,-1,
-        2,10,1,
-        2,10,-1,
-        0,10,1,
-        0,10,-1,//3
-        0,0,1,
-        0,0,-1,
-        2,0,1,
-        2,0,-1,
-        2,4,1,
-        2,4,-1,
-        0,4,1,
-        0,4,-1,//4
-        0,0,1,
-        0,0,-1,
-        2,0,1,
-        2,0,-1,
-        2,5,1,
-        2,5,-1,
-        0,5,1,
-        0,5,-1,//5
+        0,0,0,//-
+        -1,0,1,
+        -1,0,-1,
+        1,0,1,
+        1,0,-1,
+        1,6,1,
+        1,6,-1,
+        -1,6,1,
+        -1,6,-1,//2
+        -1,0,1,
+        -1,0,-1,
+        1,0,1,
+        1,0,-1,
+        1,7,1,
+        1,7,-1,
+        -1,7,1,
+        -1,7,-1,//3
+        -1,0,1,
+        -1,0,-1,
+        1,0,1,
+        1,0,-1,
+        1,4,1,
+        1,4,-1,
+        -1,4,1,
+        -1,4,-1,//4
+        -1,0,1,
+        -1,0,-1,
+        1,0,1,
+        1,0,-1,
+        1,5,1,
+        1,5,-1,
+        -1,5,1,
+        -1,5,-1,//5
+        -1,0,1,
+        -1,0,-1,
+        1,0,1,
+        1,0,-1,
+        1,3,1,
+        1,3,-1,
+        -1,3,1,
+        -1,3,-1,//6
+        -1,0,1,
+        -1,0,-1,
+        1,0,1,
+        1,0,-1,
+        1,5,1,
+        1,5,-1,
+        -1,5,1,
+        -1,5,-1,//7
     };
 
     std::vector<double> tri_local_pos{
@@ -585,9 +626,11 @@ int main(int argc, char* argv[]) {
     //relative positions
     dfm2::CVec3d a1{0,0,0};
     dfm2::CVec3d b1{ 0,6,0 };
-    dfm2::CVec3d c1{ 0,10,0 };
+    dfm2::CVec3d c1{ 0,7,0 };
     dfm2::CVec3d d1{ 0,4,0 };
     dfm2::CVec3d e1{ 0,5,0 };
+    dfm2::CVec3d f1{ 0,3,0 };
+    dfm2::CVec3d g1{ 0,5,0 };
 
     dfm2::CQuatd q{ 1,0,0,0 };
     q.normalize();
@@ -597,6 +640,8 @@ int main(int argc, char* argv[]) {
     easy_joint bone3{ "joint2",c1 ,q};
     easy_joint bone4{ "joint3",d1 ,q };
     easy_joint bone5{ "joint4",e1 ,q};
+    easy_joint bone6{ "joint5",f1 ,q };
+    easy_joint bone7{ "joint6",g1 ,q };
 
     std::vector<easy_joint> all_easy_bone;
     all_easy_bone.push_back(bone1);
@@ -604,6 +649,8 @@ int main(int argc, char* argv[]) {
     all_easy_bone.push_back(bone3);
     all_easy_bone.push_back(bone4);
     all_easy_bone.push_back(bone5);
+    all_easy_bone.push_back(bone6);
+    all_easy_bone.push_back(bone7);
 
     dfm2::glfw::CViewer3 viewer_source(35);
 
@@ -672,7 +719,7 @@ int main(int argc, char* argv[]) {
 
         Floor floor{ 100, +0.1 };
 
-        int converge_time = 10;
+        int converge_time = 50;
         
         for (unsigned int j = 0; j < converge_time; j++)
         {
@@ -686,31 +733,51 @@ int main(int argc, char* argv[]) {
 
                 dfm2::CQuatd r_q;
                 r_q = qfv(jointnow_dir, target_dir);
+                r_q.SetSmallerRotation();
                 r_q.normalize();
                 //dfm2::CQuatd qnew = r_q * all_easy_bone[i].q;
-                if (i == 0)
+                if (i == 0) 
                 {
                     dfm2::CQuatd qnew = r_q * all_easy_bone[i + 1].q;
                     qnew.normalize();
                     double y[4];
-                    double xy[4];
-                    SeparateZRot(y, xy, qnew.p);
-                    dfm2::CQuatd yaxis(y);
-                    dfm2::CQuatd y_inv = yaxis.conjugate();
-                    dfm2::CQuatd q0yinvqi = y_inv * qnew;
-                    q0yinvqi.normalize();
-                    //dfm2::CQuatd qnew2 = r_test2 * all_easy_bone[2].q;
-                    //qnew2.normalize();
-                    //all_easy_bone[i].q = qnew;
-                    double ty[4];
-                    double txy[4];
-                    SeparateYRot(ty, txy, q0yinvqi.p);
-                    dfm2::CQuatd ytaxis(ty);
-                    dfm2::CQuatd yt_inv = ytaxis.conjugate();
-                    dfm2::CQuatd qfinal = yt_inv * q0yinvqi;
+                    double xz[4];
+                    SeparateYRot(y, xz, qnew.p);
+
+                    dfm2::CQuatd xz_axis(xz);
+                    dfm2::CQuatd xz_inv = xz_axis.conjugate();
+                    dfm2::CQuatd q0a = xz_inv * qnew;
+                    q0a.normalize();
+
+                    all_easy_bone[i + 1].q = q0a;
+                }
+                else if (i == 1)
+                {
+                    dfm2::CQuatd qnew = r_q * all_easy_bone[i + 1].q;
+                    qnew.normalize();
+                    dfm2::CVec3d v_q{ qnew.x,qnew.y,qnew.z };
+                    v_q = v_q / v_q.norm();
+                    double theta = 2 * atan2(v_q.norm(), qnew.w);
+                    double new_r = std::clamp(theta, -M_PI / 2, M_PI / 2);
+                    dfm2::CQuatd qfinal{ cos(new_r / 2),v_q.x * sin(new_r / 2),v_q.y * sin(new_r / 2),v_q.z * sin(new_r / 2) };
                     qfinal.normalize();
+
                     all_easy_bone[i + 1].q = qfinal;
                 }
+                /*
+                else if (i == 1)
+                {
+                    dfm2::CQuatd qnew = r_q * all_easy_bone[i + 1].q;
+                    double x[4];
+                    double zy[4];
+                    SeparateXRot(x, zy, qnew.p);
+                    dfm2::CQuatd zy_axis(zy);
+                    dfm2::CQuatd zy_inv = zy_axis.conjugate();
+                    dfm2::CQuatd q0a = zy_inv * qnew;
+                    q0a.normalize();
+                    all_easy_bone[i + 1].q = q0a;
+                }
+                */
                 else {
                     dfm2::CQuatd qnew = r_q * all_easy_bone[i + 1].q;
                     qnew.normalize();
@@ -873,7 +940,7 @@ int main(int argc, char* argv[]) {
        
         viewer_source.view_rotation->Rot_Camera(-static_cast<float>(gamepad2_x), -static_cast<float>(gamepad2_y));
 
-        floor.draw_checkerboard();
+        //floor.draw_checkerboard();
         // GUI *******
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplGlfw_NewFrame();
