@@ -10,6 +10,9 @@ Practice for some popular IK implemntaion in OpenGL 2.0
 
 ## TODO
 - [x] CCD
+    - [x] Basic
+    - [x] Hinges
+    - [x] Limits
 - [ ] FABRIK
 - [ ] Jacobian Transpose
 
