@@ -8,3 +8,4 @@ cmake-build-release
 cmake-build-debug
 
 */build/
+/0_ikccd/mainold.cpp
