@@ -138,27 +138,19 @@ struct easy_joint
     dfm2::CQuatd q;
     dfm2::CVec3d axis;
     int iparent;
-    std::vector<dfm2::CVec3d> tri_pos;
-    std::vector<dfm2::CVec3d> global_tripos;
+    double affineglobal[16] ={1,0,0,0,
+                              0,1,0,0,
+                              0,0,1,0,
+                              0,0,0,1};
     std::vector<dfm2::CVec3d> quad_pos;
     std::vector<dfm2::CVec3d> global_quadpos;
-    //std::vector<dfm2::CVec3d> box_pos;
-    //dfm2::CVec3d box_a;
-    //dfm2::CVec3d box_b;
-    //dfm2::CVec3d global_box_a;
-    //dfm2::CVec3d global_box_b;
-    dfm2::CVec3d globalpos;
-};
 
-dfm2::CVec3d vector_mul_matrix(dfm2::CVec3d& vec, dfm2::CMat4d& mat)
-{
-    dfm2::CVec3d result{ 0.0,0.0,0.0 };
-    for (unsigned int i = 0; i < 3; i++)
+    dfm2::CVec3d globalpos()
     {
-        result[i] = vec.x * mat.mat[i * 4 + 0] + vec.y * mat.mat[i * 4 + 1] + vec.z * mat.mat[i * 4 + 2];
+        return dfm2::CVec3d(affineglobal[3], affineglobal[7], affineglobal[11]);
     }
-    return result;
-}
+        
+};
 
 
 void draw_box(std::vector<easy_joint>& joints) {
@@ -251,25 +243,6 @@ void draw_box_edge(std::vector<easy_joint>& joints) {
   
 }
 
-
-void draw_tris(std::vector<easy_joint>& joints)
-{
-
-    ::glEnable(GL_LIGHTING);
-    GLfloat cyan[] = { 0.f, .8f, .8f, 1.f };
-    ::glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan);
-    ::glBegin(GL_TRIANGLES);
-    for (unsigned int i = 0; i < joints.size(); i++)
-    {
-        ::glVertex3d(joints[i].global_tripos[0].x, joints[i].global_tripos[0].y, joints[i].global_tripos[0].z);
-        ::glVertex3d(joints[i].global_tripos[1].x, joints[i].global_tripos[1].y, joints[i].global_tripos[1].z);
-        ::glVertex3d(joints[i].global_tripos[2].x, joints[i].global_tripos[2].y, joints[i].global_tripos[2].z);
-    }
-    ::glEnd();
-    ::glDisable(GL_LIGHTING);
-}
-
-
 void init_joint_quad(std::vector<easy_joint>& joints, std::vector<double> quad_coord)
 {
     std::cout << quad_coord.size() / 24 << " - size" << std::endl;
@@ -294,177 +267,53 @@ void init_joint_quad(std::vector<easy_joint>& joints, std::vector<double> quad_c
    
         if (i == 0)
         {
-            joints[i].globalpos = joints[i].offsetpos;
+            //joints[i].globalpos = joints[i].offsetpos;
             for (unsigned int t = 0; t < 8; t++)
             {
-                joints[i].global_quadpos.push_back(joints[i].globalpos + joints[i].quad_pos[t]);
+                joints[i].global_quadpos.push_back(joints[i].globalpos() + joints[i].quad_pos[t]);
             }
         }
         else
         {
-            joints[i].globalpos = joints[i - 1].globalpos + joints[i].offsetpos;
+            //joints[i].globalpos = joints[i - 1].globalpos + joints[i].offsetpos;
             for (unsigned int t = 0; t < 8; t++)
             {
-                joints[i].global_quadpos.push_back(joints[i].globalpos + joints[i].quad_pos[t]);
+                joints[i].global_quadpos.push_back(joints[i].globalpos() + joints[i].quad_pos[t]);
             }
         }
     }
 }
 
-void init_joint(std::vector<easy_joint>& joints, std::vector<double> tri_coord)
+void update_j_final(std::vector<easy_joint>& joints, int bone_index)
 {
-    std::cout << tri_coord.size() / 9 << " size" << std::endl;
-    for (unsigned int i = 0; i < joints.size(); i++)
+    for (unsigned int i = bone_index; i < joints.size(); i ++)
     {
-        dfm2::CVec3d a{ tri_coord[i * 9 + 0],tri_coord[i * 9 + 1],tri_coord[i * 9 + 2] };
-        dfm2::CVec3d b{ tri_coord[i * 9 + 3],tri_coord[i * 9 + 4],tri_coord[i * 9 + 5] };
-        dfm2::CVec3d c{ tri_coord[i * 9 + 6],tri_coord[i * 9 + 7],tri_coord[i * 9 + 8] };
-        joints[i].tri_pos.push_back(a);
-        joints[i].tri_pos.push_back(b);
-        joints[i].tri_pos.push_back(c);
-        if (i == 0)
-        {
-            joints[i].offsetpos = joints[i].offsetpos;
-            for (unsigned int t = 0; t < 3; t++)
-            {
-                joints[i].global_tripos.push_back(joints[i].globalpos + joints[i].tri_pos[t]);
-            }
-        }
-        else
-        {
-            joints[i].offsetpos = joints[i - 1].offsetpos + joints[i].offsetpos;
-            joints[i].axis = joints[i - 1].globalpos + joints[i].axis;
-            for (unsigned int t = 0; t < 3; t++)
-            {
-                joints[i].global_tripos.push_back(joints[i].globalpos + joints[i].tri_pos[t]);
-            }
-        }
-    }
-}
+        dfm2::CMat4d m01 = dfm2::CMat4d::Translation({ joints[i].offsetpos.x,joints[i].offsetpos.y,joints[i].offsetpos.z });
+        m01 = m01 * dfm2::CMat4d::Quat(joints[i].q.p);
 
-void updateeasyjoint_quad(std::vector<easy_joint>& joints, int bone_index)
-{
-    /*
-    if (bone_index == 0)
+        const int ibone_p = joints[i].iparent;
+        if (ibone_p < 0 || ibone_p >= (int)joints.size())
+        {
+            dfm2::Copy_Mat4(joints[i].affineglobal, m01.mat);
+            continue;
+        }
+        assert(ibone_p < (int)ibone);
+
+        dfm2::MatMat4(joints[i].affineglobal, joints[ibone_p].affineglobal, m01.mat);
+    }
+    for (unsigned int i = bone_index; i < joints.size(); i++)
     {
-        dfm2::CQuatd q0(joints[0].q);
-        dfm2::CMat4d m00 = dfm2::CMat4d::Quat(q0.p);
-        joints[0].globalpos = joints[0].offsetpos;
-        joints[1].globalpos = joints[0].globalpos + vector_mul_matrix(joints[1].offsetpos, m00);
         for (unsigned int t = 0; t < 8; t++)
         {
-            joints[0].global_quadpos[t] = vector_mul_matrix(joints[0].quad_pos[t], m00);
-        }
-
-        for (unsigned int i = 1; i < joints.size(); i++)
-        {
-            dfm2::CQuatd globalq(joints[0].q);
-            dfm2::CQuatd global_quad_q(joints[0].q);
-            dfm2::CQuatd axisq(joints[0].q);
-            for (unsigned int j = 0; j <= i - 1; j++)
-            {
-                globalq = joints[j].q * globalq;
-                if (j != i)
-                {
-                    axisq = joints[j].q * axisq;
-                }
-            }
-
-            for (unsigned int j = 0; j <= i; j++)
-            {
-                global_quad_q = joints[j].q * global_quad_q;
-            }
-            axisq.normalize();
-            globalq.normalize();
-            dfm2::CMat4d m01 = dfm2::CMat4d::Quat(axisq.p);
-            dfm2::CMat4d m02 = dfm2::CMat4d::Quat(globalq.p);
-            dfm2::CMat4d m_global_quad = dfm2::CMat4d::Quat(global_quad_q.p);
-            joints[i].globalpos = joints[i - 1].globalpos + vector_mul_matrix(joints[i].offsetpos, m02);
-            joints[i].axis = joints[i - 1].globalpos + vector_mul_matrix(joints[i].axis, m01);
-            joints[i].axis.normalize();
-
-            for (unsigned int t = 0; t < 8; t++)
-            {
-                joints[i].global_quadpos[t] = joints[i].globalpos + vector_mul_matrix(joints[i].quad_pos[t], m_global_quad);
-            }
-
+            double quad_off[4] = { joints[i].quad_pos[t].x,joints[i].quad_pos[t].y,joints[i].quad_pos[t].z,1 };
+            double quad_new[4] = { 0,0,0,0 };
+            dfm2::MatVec4(quad_new, joints[i].affineglobal, quad_off);
+            //dfm2::CVec3d quad_glo_new(quad_new[0], quad_new[1], quad_new[2]);
+            joints[i].global_quadpos[t] = { quad_new[0], quad_new[1], quad_new[2] };
         }
     }
-    */
-    //else
-    //{
-        for (unsigned int i = bone_index; i < joints.size(); i++)
-        {
-            dfm2::CQuatd globalq{1,0,0,0};
-            dfm2::CQuatd global_quad_q{1,0,0,0};
-            if (i != 0)
-            {
-                for (unsigned int j = 0; j <= i - 1; j++)
-                {
-                    globalq = joints[j].q * globalq;
-                }
-            }
-                for (unsigned int z = 0; z <= i; z++)
-                {
-                    global_quad_q = joints[z].q * global_quad_q;
-                }
 
-                //global_quad_q = joints[i].q * global_quad_q;
-                globalq.normalize();
-                global_quad_q.normalize();
-                //axisq.normalize();
-                globalq.normalize();
-                //dfm2::CMat4d m01 = dfm2::CMat4d::Quat(axisq.p);
-                dfm2::CMat4d m02 = dfm2::CMat4d::Quat(globalq.p);
-                dfm2::CMat4d m2_global_quad = dfm2::CMat4d::Quat(global_quad_q.p);
-                if (i == bone_index)
-                {
-                    joints[i].globalpos = joints[i].globalpos;
-                }
-                else
-                {
-                    joints[i].globalpos = joints[i - 1].globalpos + vector_mul_matrix(joints[i].offsetpos, m02);
-                }
-
-                for (unsigned int t = 0; t < 8; t++)
-                {
-                    joints[i].global_quadpos[t] = joints[i].globalpos + vector_mul_matrix(joints[i].quad_pos[t], m2_global_quad);
-                }
-        }
 }
-
-
-void updateeasyjoint(std::vector<easy_joint>& joints)
-{
-    dfm2::CQuatd q0(joints[0].q);
-    dfm2::CMat4d m01 = dfm2::CMat4d::Quat(q0.p);
-    joints[0].globalpos = vector_mul_matrix(joints[0].offsetpos, m01);
-    for (unsigned int t = 0; t < 3; t++)
-    {
-        joints[0].global_tripos[t] = joints[0].globalpos + vector_mul_matrix(joints[0].tri_pos[t], m01);
-    }
-
-    for (unsigned int i = 1; i < joints.size(); i++)
-    {
-        dfm2::CQuatd globalq(joints[0].q);
-        for (unsigned int j = 1; j <= i; j++)
-        {
-            globalq = joints[j].q * globalq;
-        }
-
-        globalq.normalize();
-
-        dfm2::CMat4d m02 = dfm2::CMat4d::Quat(globalq.p);
-        joints[i].globalpos = joints[i - 1].globalpos + vector_mul_matrix(joints[i].offsetpos, m02);
-
-        for (unsigned int t = 0; t < 3; t++)
-        {
-            joints[i].global_tripos[t] = joints[i - 1].globalpos + vector_mul_matrix(joints[i].tri_pos[t], m02);
-        }
-
-    }
-}
-
 void draweasybone(std::vector<easy_joint>& joints)
 {
 
@@ -474,7 +323,7 @@ void draweasybone(std::vector<easy_joint>& joints)
     ::glBegin(GL_LINE_STRIP);
     for (unsigned int i = 0; i < joints.size(); i++)
     {
-        ::glVertex3d(joints[i].globalpos.x, joints[i].globalpos.y, joints[i].globalpos.z);
+        ::glVertex3d(joints[i].globalpos().x, joints[i].globalpos().y, joints[i].globalpos().z);
     }
     ::glEnd();
 }
@@ -484,7 +333,7 @@ void draw_bone_p(std::vector<easy_joint>& joints)
     ::glColor3d(0.9, 0.05, 0.05);
     for (unsigned int i = 0; i < joints.size(); i++)
     {
-        ::delfem2::opengl::DrawSphereAt(32, 32, 0.5, joints[i].globalpos.x, joints[i].globalpos.y, joints[i].globalpos.z);
+        ::delfem2::opengl::DrawSphereAt(32, 32, 0.5, joints[i].globalpos().x, joints[i].globalpos().y, joints[i].globalpos().z);
     }
     
 }
@@ -550,34 +399,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 }
-
-/*
-void bone_init(std::vector<dfm2::CRigBone>& bones)
-{
-    for (unsigned int ibone = 0; ibone < bones.size(); ++ibone) {
-        dfm2::CRigBone& bone = bones[ibone];
-        bone.scale = 1.0;
-        bone.quatRelativeRot[0] = 0.0;
-        bone.quatRelativeRot[1] = 0.0;
-        bone.quatRelativeRot[2] = 0.0;
-        bone.quatRelativeRot[3] = 1.0;
-        bone.transRelative[0] = 0.0;
-        bone.transRelative[1] = 0.0;
-        bone.transRelative[2] = 0.0;
-        if (bone.ibone_parent != -1) {
-            const dfm2::CRigBone& bone_p = bones[bone.ibone_parent];
-            bone.transRelative[0] = (-bone.invBindMat[3]) - (-bone_p.invBindMat[3]);
-            bone.transRelative[1] = (-bone.invBindMat[7]) - (-bone_p.invBindMat[7]);
-            bone.transRelative[2] = (-bone.invBindMat[11]) - (-bone_p.invBindMat[11]);
-        }
-    }
-    for (auto& bone : bones) {
-        for (int i = 0; i < 16; ++i) { bone.affmat3Global[i] = bone.invBindMat[i]; }
-        int info;
-        dfm2::rig_bvh::CalcInvMat(bone.affmat3Global, 4, info);
-    }
-}
-*/
 
 dfm2::CQuatd qfv(dfm2::CVec3d& u, dfm2::CVec3d& v)
 {
@@ -648,14 +469,14 @@ int main(int argc, char* argv[]) {
         1,2,-1,
         -1,2,1,
         -1,2,-1,//2
-        -1,0,1,
-        -1,0,-1,
-        1,0,1,
-        1,0,-1,
-        1,7,1,
+        -1,-1,-1,
+        -1,-1,-3,
+        1,-1,-1,
+        1,-1,-3,
         1,7,-1,
-        -1,7,1,
-        -1,7,-1,//3
+        1,7,-3,
+        -1,7,-1,
+        -1,7,-3,//3
         -1,0,1,
         -1,0,-1,
         1,0,1,
@@ -784,7 +605,8 @@ int main(int argc, char* argv[]) {
     //assert((tri_local_pos.size() == 451) && "Yet another way to add assert message");
     init_joint_quad(all_easy_bone, quad_local_pos);
     //init_joint(all_easy_bone, tri_local_pos);
-    updateeasyjoint_quad(all_easy_bone,0);
+    //updateeasyjoint_quad(all_easy_bone,0);
+    update_j_final(all_easy_bone,0);
     std::vector<double> dis_vector;
     while (!glfwWindowShouldClose(viewer_source.window))
     {
@@ -798,44 +620,29 @@ int main(int argc, char* argv[]) {
 
         Floor floor{ 100, +0.1 };
 
-        int converge_time = 1;
+        int converge_time = 20;
 
 
         for (unsigned int c = 0 ; c < converge_time; c++)
         {
             for (int i = all_easy_bone.size() - 2; i >= 0; i--)
             {
-                updateeasyjoint_quad(all_easy_bone, i);
-                dfm2::CVec3d jointnow(all_easy_bone[i].globalpos);
-                dfm2::CVec3d end(all_easy_bone[all_easy_bone.size() - 1].globalpos);
+                //updateeasyjoint_quad(all_easy_bone, i);
+                update_j_final(all_easy_bone, i);
+                dfm2::CVec3d jointnow(all_easy_bone[i].globalpos());
+                dfm2::CVec3d end(all_easy_bone[all_easy_bone.size() - 1].globalpos());
                 dfm2::CVec3d endeff_dir = end - jointnow;
                 dfm2::CVec3d target_dir = target - jointnow;
                 endeff_dir.normalize();
                 target_dir.normalize();
                 dfm2::CQuatd r_q;
-                r_q = qfv(endeff_dir, target_dir);
+                r_q = old_quatfromtwovectors(endeff_dir, target_dir);
                 //r_q.SetSmallerRotation();
                 r_q.normalize();
 
-                /*
-                if (i == 0)
+                if (i <= 2)
                 {
-                    dfm2::CQuatd q_current = r_q * all_easy_bone[i].q;
-                    q_current.normalize();
-                    double y[4];
-                    double xz[4];
-                    SeparateYRot(y, xz, q_current.p);
-
-                    dfm2::CQuatd Qxz(xz);
-                    dfm2::CQuatd Qxz_inv = Qxz.conjugate();
-                    dfm2::CQuatd q0a = q_current * Qxz_inv;
-                    q0a.normalize();
-
-                    all_easy_bone[i].q = q0a;
-                }
-                */
-                if (i == 0)
-                {
+                    // add hinge
                     dfm2::CQuatd q_current = r_q * all_easy_bone[i].q;
                     q_current.normalize();
                     double y[4];
@@ -844,24 +651,18 @@ int main(int argc, char* argv[]) {
                         SeparateYRot(y, xz, q_current.p);
                     else
                     {
-                        SeparateXRot(y, xz, q_current.p);
+                        SeparateZRot(y, xz, q_current.p);
                     }
 
                     dfm2::CQuatd Qxz(xz);
                     dfm2::CQuatd Qxz_inv = Qxz.conjugate();
-                    dfm2::CQuatd q0a = q_current * Qxz_inv;
-                    q0a.normalize();
-
-                    all_easy_bone[i].q = q0a;
-                }
-                else if (i == 1)
-                {
-                    dfm2::CQuatd qnew = r_q * all_easy_bone[i].q;
+                    dfm2::CQuatd qnew = q_current * Qxz_inv;
                     qnew.normalize();
+                    // add angle limit -90 , 90
                     dfm2::CVec3d v_q{ qnew.x,qnew.y,qnew.z };
                     v_q = v_q / v_q.norm();
-                    double theta = 2 * atan2(v_q.norm(), qnew.w);
-                    double new_r = std::clamp(theta, -M_PI / 2, M_PI / 2);
+                    double theta = 2 * acos(qnew.w);
+                    double new_r = std::clamp(theta, -90 * 0.0174533, 90 * 0.0174533);
                     dfm2::CQuatd qfinal{ cos(new_r / 2),v_q.x * sin(new_r / 2),v_q.y * sin(new_r / 2),v_q.z * sin(new_r / 2) };
                     qfinal.normalize();
 
@@ -869,11 +670,12 @@ int main(int argc, char* argv[]) {
                 }
                 else
                 {
+                    // rest bones are no hinge and no limit bones
                     dfm2::CQuatd qnew = r_q * all_easy_bone[i].q;
                     all_easy_bone[i].q = qnew;
                 }
-                updateeasyjoint_quad(all_easy_bone, i);
 
+                update_j_final(all_easy_bone, i);
             }
         }
         
@@ -886,7 +688,7 @@ int main(int argc, char* argv[]) {
         dis_vector.clear();
         for (unsigned int i = 1; i < 5; i++)
         {
-            dfm2::CVec3d disv = all_easy_bone[i].globalpos - all_easy_bone[i - 1].globalpos;
+            dfm2::CVec3d disv = all_easy_bone[i].globalpos() - all_easy_bone[i - 1].globalpos();
             double dis = disv.norm();
             dis_vector.push_back(dis);
         }
