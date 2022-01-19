@@ -1,4 +1,4 @@
-# IK_example
+# IK_example (0_ikccd)
 
 Practice for some popular IK implemntaion in OpenGL 2.0 
 
@@ -25,7 +25,7 @@ Practice for some popular IK implemntaion in OpenGL 2.0
 
 ![title](thumbnail.gif)
 
-# Skeleton IK
+# Skeleton IK (1_skeleton_ik)
 Applying the CCD IK on rig bones 
 ## Control
 1. Using **W S A D** control the horizontal movement of the target 
