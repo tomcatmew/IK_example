@@ -165,7 +165,7 @@ void draw_box(std::vector<easy_joint>& joints) {
         {
             ::glMaterialfv(GL_FRONT, GL_DIFFUSE, cgreen);
         }
-        else if (i == 1)
+        else if ((i == 1) || (i == 2))
         {
             ::glMaterialfv(GL_FRONT, GL_DIFFUSE, cred);
         }
@@ -312,8 +312,18 @@ void update_j_final(std::vector<easy_joint>& joints, int bone_index)
             joints[i].global_quadpos[t] = { quad_new[0], quad_new[1], quad_new[2] };
         }
     }
-
 }
+
+void reset_pose(std::vector<easy_joint>& joints)
+{
+    dfm2::CQuatd oq{ 1,0,0,0 };
+    for (unsigned int i = 0; i < joints.size(); i++)
+    {
+        joints[i].q = oq;
+    }
+    update_j_final(joints, 0);
+}
+
 void draweasybone(std::vector<easy_joint>& joints)
 {
 
@@ -403,8 +413,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 dfm2::CQuatd qfv(dfm2::CVec3d& u, dfm2::CVec3d& v)
 {
     // a concise version of q from 2 vectors
-    //u.normalize();
-    //v.normalize();
+    u.normalize();
+    v.normalize();
     double k = 1.0 + u.dot(v);
     double s = 1 / sqrt(k + k);
     dfm2::CVec3d cross = u.cross(v);
@@ -469,14 +479,14 @@ int main(int argc, char* argv[]) {
         1,2,-1,
         -1,2,1,
         -1,2,-1,//2
-        -1,-1,-1,
-        -1,-1,-3,
-        1,-1,-1,
-        1,-1,-3,
+        -1,0,1,
+        -1,0,-1,
+        1,0,1,
+        1,0,-1,
+        1,7,1,
         1,7,-1,
-        1,7,-3,
-        -1,7,-1,
-        -1,7,-3,//3
+        -1,7,1,
+        -1,7,-1,//3
         -1,0,1,
         -1,0,-1,
         1,0,1,
@@ -620,15 +630,15 @@ int main(int argc, char* argv[]) {
 
         Floor floor{ 100, +0.1 };
 
-        int converge_time = 20;
+        int converge_time = 30;
 
-
+        reset_pose(all_easy_bone);
         for (unsigned int c = 0 ; c < converge_time; c++)
         {
             for (int i = all_easy_bone.size() - 2; i >= 0; i--)
             {
                 //updateeasyjoint_quad(all_easy_bone, i);
-                update_j_final(all_easy_bone, i);
+                //update_j_final(all_easy_bone, i);
                 dfm2::CVec3d jointnow(all_easy_bone[i].globalpos());
                 dfm2::CVec3d end(all_easy_bone[all_easy_bone.size() - 1].globalpos());
                 dfm2::CVec3d endeff_dir = end - jointnow;
@@ -636,7 +646,7 @@ int main(int argc, char* argv[]) {
                 endeff_dir.normalize();
                 target_dir.normalize();
                 dfm2::CQuatd r_q;
-                r_q = old_quatfromtwovectors(endeff_dir, target_dir);
+                r_q = qfv(endeff_dir, target_dir);
                 //r_q.SetSmallerRotation();
                 r_q.normalize();
 
