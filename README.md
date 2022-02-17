@@ -20,7 +20,9 @@ Practice for some popular IK implemntaion in OpenGL 2.0
     - [x] Hinges
     - [x] Limits
 - [ ] FABRIK
-- [x] Jacobian Transpose
+- [x] Jacobian
+    - [x] Jacobian Transpose
+    - [ ] Jacobian Inverse
 
 
 ![title](thumbnail.gif)
@@ -35,8 +37,9 @@ Applying the CCD IK on rig bones
 5. Using **Scroll up/down** control the camera zoom in/out
 ![title](ik_skeleton.gif)
 
-# Jacobian Matrix (using Jacobian Transpose) (2_ik_jacobian)
+# Jacobian Transpose (2_ik_jacobian)
 
 ![jacobian](jacobian.gif)
 
-Practice for some popular IK implemntaion in OpenGL 2.0 
+
+*Practice for some popular IK implemntaion in OpenGL 2.0*
