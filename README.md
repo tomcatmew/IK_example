@@ -47,16 +47,17 @@ My favorite one would be the FABRIK one 👍
 
 
 # CCD IK (0_ikccd)
-CCD IK implementation using a custom 3D struct built by myself 
+All IK implementation using a custom 3D struct built by myself \
+No external library for 3D object \
 ![title](thumbnail.gif)
 
 # Skeleton IK (1_skeleton_ik)
-Applying the CCD IK on rig bones 
+Applying the CCD IK on rig bones \
 ![title](ik_skeleton.gif)
 
 # Jacobian Transpose (2_ik_jacobian)
 ![jacobian](jacobian.gif)
 
 # FABRIK (3_FABRIK)
-![fabrik](FABRIK.gif)
+![fabrik](fabrik.gif)
 *Practice for some popular IK implemntaion in OpenGL 2.0 Copyright Yifei Chen*
