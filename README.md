@@ -47,7 +47,7 @@ My favorite one would be the FABRIK one 👍
 
 
 # CCD IK with Constraints(0_ikccd)
-Constraints are on first 3 joints. **Green** joint only can rotate along local Y axis, **Red** joints only can rotate along local X axis, with Euler degree constraint of -90,90 degrees. \
+Constraints are on first 3 joints. **Green** joint only can rotate along **local Y axis**, **Red** joints only can rotate along **local X axis**, with Euler degree constraint of **-90,90 degrees**. \
 All IK implementation using a custom 3D struct built by myself \
 No external library for 3D object \
 ![title](thumbnail.gif)
@@ -57,9 +57,10 @@ Applying the CCD IK on rig bones \
 ![title](ik_skeleton.gif)
 
 # Jacobian Transpose (2_ik_jacobian)
+Using Jacobian Transpose and analytical method to compute the Jacobian
 ![jacobian](jacobian.gif)
 
 # FABRIK (3_FABRIK)
-No constraints \
+**No constraints applied** \
 ![fabrik](fabrik1.gif) \
 *Practice for some popular IK implemntaion in OpenGL 2.0 Copyright Yifei Chen*
