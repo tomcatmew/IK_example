@@ -15,7 +15,7 @@ My favorite one would be the FABRIK one 👍
   - [Installation](#installation-guide-for-windows-user-visual-studio)
   - [How to control](#control)
   - [TODO](#todo)
-- [CCD IK](#ccd-ik-0_ikccd)
+- [CCD IK with Constraints](#ccd-ik-with-constraints0_ikccd)
 - [Skeleton IK](#skeleton-ik-1_skeleton_ik)
 - [Jacobian IK](#jacobian-transpose-2_ik_jacobian)
 - [FABRIK](#fabrik-3_fabrik)
@@ -38,15 +38,16 @@ My favorite one would be the FABRIK one 👍
 ## TODO
 - [x] CCD
     - [x] Basic
-    - [x] Hinges
-    - [x] Limits
+    - [x] Hinges (Constraint of rotation axis)
+    - [x] Limits (Constraint of rotation angle)
 - [x] FABRIK
 - [x] Jacobian
     - [x] Jacobian Transpose
     - [ ] Jacobian Inverse
 
 
-# CCD IK (0_ikccd)
+# CCD IK with Constraints(0_ikccd)
+Constraints are on first 3 joints. **Green** joint only can rotate along local Y axis, **Red** joints only can rotate along local X axis, with Euler degree constraint of -90,90 degrees. \
 All IK implementation using a custom 3D struct built by myself \
 No external library for 3D object \
 ![title](thumbnail.gif)
@@ -59,5 +60,6 @@ Applying the CCD IK on rig bones \
 ![jacobian](jacobian.gif)
 
 # FABRIK (3_FABRIK)
-![fabrik](fabrik.gif)
+No constraints \
+![fabrik](fabrik.gif) \
 *Practice for some popular IK implemntaion in OpenGL 2.0 Copyright Yifei Chen*
