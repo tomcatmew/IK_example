@@ -169,11 +169,11 @@ void draw_box(std::vector<easy_joint>& joints) {
 
         if (i == 0)
         {
-            ::glMaterialfv(GL_FRONT, GL_DIFFUSE, cgreen);
+            ::glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan);
         }
         else if ((i == 1) || (i == 2))
         {
-            ::glMaterialfv(GL_FRONT, GL_DIFFUSE, cred);
+            ::glMaterialfv(GL_FRONT, GL_DIFFUSE, cyan);
         }
         else
         {
@@ -303,7 +303,6 @@ void update_j_final(std::vector<easy_joint>& joints, int bone_index)
             dfm2::Copy_Mat4(joints[i].affineglobal, m01.mat);
             continue;
         }
-        assert(ibone_p < (int)ibone);
 
         dfm2::MatMat4(joints[i].affineglobal, joints[ibone_p].affineglobal, m01.mat);
     }

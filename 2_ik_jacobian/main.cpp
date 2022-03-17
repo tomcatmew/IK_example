@@ -297,7 +297,7 @@ void update_j_final(std::vector<easy_joint>& joints, int bone_index)
             dfm2::Copy_Mat4(joints[i].affineglobal, m01.mat);
             continue;
         }
-        assert(ibone_p < (int)ibone);
+        //assert(ibone_p < (int)ibone);
 
         dfm2::MatMat4(joints[i].affineglobal, joints[ibone_p].affineglobal, m01.mat);
     }

@@ -13,7 +13,7 @@ ENDIF ()
 
 ####################################
 
-project(0_FABRIK)
+project(3_FABRIK)
 
 add_definitions(-DPATH_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
