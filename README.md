@@ -61,5 +61,5 @@ Applying the CCD IK on rig bones \
 
 # FABRIK (3_FABRIK)
 No constraints \
-![fabrik](fabrik.gif) \
+![fabrik](fabrik1.gif) \
 *Practice for some popular IK implemntaion in OpenGL 2.0 Copyright Yifei Chen*
