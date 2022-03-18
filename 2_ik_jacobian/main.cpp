@@ -2,6 +2,7 @@
 
 
 #include <chrono>
+#include <filesystem>
 
 #include <iostream>
 #include <vector>
@@ -472,33 +473,33 @@ dfm2::CQuatd old_quatfromtwovectors(dfm2::CVec3d& u, dfm2::CVec3d& v)
 
 // =======================================
 int main(int argc, char* argv[]) {
-    dfm2::CVec3d target{5.0,8.0,0.0};
+    dfm2::CVec3d target{5.0,30.0,0.0};
     
     std::vector<double> quad_local_pos{
         -1,0,1,
         -1,0,-1,
         1,0,1,
         1,0,-1,
-        1,2,1,
-        1,2,-1,
-        -1,2,1,
-        -1,2,-1,//1
+        1,8,1,
+        1,8,-1,
+        -1,8,1,
+        -1,8,-1,//1
         -1,0,1,
         -1,0,-1,
         1,0,1,
         1,0,-1,
-        1,7,1,
-        1,7,-1,
-        -1,7,1,
-        -1,7,-1,//2
+        1,8,1,
+        1,8,-1,
+        -1,8,1,
+        -1,8,-1,//2
         -1,0,1,
         -1,0,-1,
         1,0,1,
         1,0,-1,
-        1,4,1,
-        1,4,-1,
-        -1,4,1,
-        -1,4,-1, //3
+        1,8,1,
+        1,8,-1,
+        -1,8,1,
+        -1,8,-1, //3
         0,0,0,
         0,0,0,
         0,0,0,
@@ -515,9 +516,9 @@ int main(int argc, char* argv[]) {
 
     //relative positions
     dfm2::CVec3d a1{0,0,0};
-    dfm2::CVec3d b1{ 0,2,0 };
-    dfm2::CVec3d c1{ 0,7,0 };
-    dfm2::CVec3d d1{ 0,4,0 };
+    dfm2::CVec3d b1{ 0,8,0 };
+    dfm2::CVec3d c1{ 0,8,0 };
+    dfm2::CVec3d d1{ 0,8,0 };
 
     dfm2::CQuatd q{ 1,0,0,0 };
     q.normalize();
@@ -537,7 +538,7 @@ int main(int argc, char* argv[]) {
 
     viewer_source.width = 1920;
     viewer_source.height = 1080;
-    viewer_source.window_title = "IK_ccd";
+    viewer_source.window_title = "IK_Jacobian";
     viewer_source.view_rotation = std::make_unique<delfem2::ModelView_Ytop>();
 
     delfem2::glfw::InitGLOld();
@@ -567,6 +568,10 @@ int main(int argc, char* argv[]) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.Fonts->AddFontDefault();
+    //std::filesystem::path path = std::filesystem::current_path();
+    //std::string fontpath = path.string() + "/../Roboto-Medium.ttf";
+    //io.Fonts->AddFontFromFileTTF(fontpath.c_str(), 20.0f);
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
@@ -618,17 +623,18 @@ int main(int argc, char* argv[]) {
         //double h = 0.00001;
 
 
-        double beta = 0.0001;
+        double beta = 0.001;
         dfm2::CVec3d old_end(all_easy_bone[all_easy_bone.size() - 1].globalpos());
         dfm2::CVec3d distance_eg = target - old_end;
 
         unsigned int count = 0;
         //  currently I let it iterate 200 times, I should check the distance and stop the loop when target is close enough
         // but I failed to use the distance stop the loop, I may mess up some parts. 
-        while (count < 200)
+        while (count < 50)
         {
             // iterate through 3 axis, Z, Y ,X
-            for (unsigned int i = 0; i < 3; i++)
+            // currently only works for Z axis, for 3 axis I need to change axis based on the parent's bone, I haven't finish yet 
+            for (unsigned int i = 0; i < 1; i++)
             {
                 //get end effector pos
                 dfm2::CVec3d end(all_easy_bone[all_easy_bone.size() - 1].globalpos());
@@ -637,7 +643,7 @@ int main(int argc, char* argv[]) {
                 // mutiply a small factor beta
                 dfm2::CVec3d dis_end_target = beta * distance_eg;
                 dfm2::CVec3d axis;
-
+              
                 // iterate through 3 axis, Z, Y ,X
                 if (i == 0)
                     axis = { 0.0,0.0,1.0 };
@@ -647,9 +653,9 @@ int main(int argc, char* argv[]) {
                     axis = { 1.0,0.0,0.0 };
 
                 //position of bone 0, 1, 2
-                dfm2::CVec3d p0 = { 0,0,0 };
-                dfm2::CVec3d p1 = bone2.globalpos();
-                dfm2::CVec3d p2 = bone3.globalpos();
+                dfm2::CVec3d p0 = all_easy_bone[0].globalpos();
+                dfm2::CVec3d p1 = all_easy_bone[1].globalpos();
+                dfm2::CVec3d p2 = all_easy_bone[2].globalpos();
 
                 //vector between end effector to bone 0,1,2
                 dfm2::CVec3d v0 = end - p0;
@@ -682,7 +688,8 @@ int main(int argc, char* argv[]) {
                 // mutiple jacobian tranpose with delta e, compute change in joint DOF
                 dfm2::MatVec3(d_theta.p, jaco_t.p_, dis_end_target.p);
 
-                // I get the change in rotation, delta_rv0,rv1,rv2
+                d_theta = d_theta * 0.05;
+                // Geting the change in rotation, delta_rv0,rv1,rv2
                 // mutiply it to the rotation axis, so we have rotation vector with magnitude (vector3 of axis-angle form)
                 dfm2::CVec3d delta_rv0 = axis * d_theta.x;
                 dfm2::CVec3d delta_rv1 = axis * d_theta.y;
@@ -690,10 +697,13 @@ int main(int argc, char* argv[]) {
 
                 // convert the axis-angle form to quaternion
                 dfm2::CQuatd delta_r0;
+                //dfm2::Quaternion_EulerAngle(delta_r0.p, {0.f,0.f,d_theta.x}, { 0,1,2 });
                 dfm2::Quat_CartesianAngle(delta_r0.p, delta_rv0.p);
                 dfm2::CQuatd delta_r1;
+                //dfm2::Quaternion_EulerAngle(delta_r1.p, { 0.f,0.f,d_theta.y }, { 0,1,2 });
                 dfm2::Quat_CartesianAngle(delta_r1.p, delta_rv1.p);
                 dfm2::CQuatd delta_r2;
+                //dfm2::Quaternion_EulerAngle(delta_r2.p, { 0.f,0.f,d_theta.z }, { 0,1,2 });
                 dfm2::Quat_CartesianAngle(delta_r2.p, delta_rv2.p);
                 
                 // mutiply quaternion to bone0,1,2 local rotation quaternion, then update their global positions
@@ -827,6 +837,8 @@ int main(int argc, char* argv[]) {
             int state_q = glfwGetKey(viewer_source.window, GLFW_KEY_Q);
             int state_e = glfwGetKey(viewer_source.window, GLFW_KEY_E);
 
+            //now only support moving on YX plane
+            /*
             if (state_w == GLFW_PRESS)
             {
                 ws_forward = -0.3f;
@@ -839,6 +851,7 @@ int main(int argc, char* argv[]) {
             {
                 ws_forward = 0.0f;
             }
+            */
             if (state_a == GLFW_PRESS)
             {
                 ad_leftright = -0.3f;
@@ -880,9 +893,11 @@ int main(int argc, char* argv[]) {
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         {
             //static float f = 0.0f;
-            ImGui::Begin("IK panel");
+            ImGui::Begin("IK Jacobian panel");
             ImGui::Text("Control Guide");
-            ImGui::Text("W S A D Q E - control the movement of target");
+            ImGui::Text("A D Q E - control the movement of target");
+            ImGui::Text("You cannot use W S because it only allows rotation on Z aixs.");
+            ImGui::Text("I'm currently working on to make it support X and Y axis rotation");
             ImGui::NewLine();
             ImGui::Separator();
             ImGui::NewLine();
