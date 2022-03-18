@@ -26,7 +26,7 @@ My favorite one would be the FABRIK one 👍
 ## Installation guide for Windows user (Visual Studio)
 1. `git submodule update --init`.
 2. download glfw [pre-compiled library](https://www.glfw.org/download) and put the uncompressed files under `3rd_party/libglfw`.
-    - Alternative you can build by yourself, but make sure the `include` and `lib` are under `3rd_party/libglfw`
+    - alternatively you can build by yourself, but make sure the `include` and `lib` are under `3rd_party/libglfw`
 3. run `cmake -S . -B build` under `/0_ikccd` or `/1_skeleton_ik` or `/2_ik_jacobian` or `/3_FABRIK` folder.
 4. `/***/build/***.sln` will be the Visual Studio solution files, open it and build in **Release** mode.
 
