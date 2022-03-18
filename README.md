@@ -32,7 +32,7 @@ My favorite one would be the FABRIK one 👍
 1. Using **W S A D** control the horizontal movement of the target 
 2. Using **E Q** control the vertical movement of the target
 3. Using **1 2 3 4** switch between four different target IK
-4. Using **ALT + Hold Left Click** control the camera
+4. Using **Hold ALT + Left Click** control the camera
 5. Using **Scroll up/down** control the camera zoom in/out
 
 ## TODO
