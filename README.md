@@ -1,6 +1,7 @@
 # IK_example (CCD Jacobian FABRIK)
 
 Practice for some popular IK implemntaion in OpenGL 2.0 
+**Make sure you build in Release Mode**
 
 My personal feeling of speed&performance for different IK methods
 
@@ -25,6 +26,7 @@ My favorite one would be the FABRIK one 👍
 ## Installation guide for Windows user (Visual Studio)
 1. `git submodule update --init`.
 2. download glfw [pre-compiled library](https://www.glfw.org/download) and put the uncompressed files under `3rd_party/libglfw`.
+    - alternatively you can build by yourself, but make sure the `include` and `lib` are under `3rd_party/libglfw`
 3. run `cmake -S . -B build` under `/0_ikccd` or `/1_skeleton_ik` or `/2_ik_jacobian` or `/3_FABRIK` folder.
 4. `/***/build/***.sln` will be the Visual Studio solution files, open it and build in **Release** mode.
 
@@ -32,7 +34,7 @@ My favorite one would be the FABRIK one 👍
 1. Using **W S A D** control the horizontal movement of the target 
 2. Using **E Q** control the vertical movement of the target
 3. Using **1 2 3 4** switch between four different target IK
-4. Using **ALT + Hold Left Click** control the camera
+4. Using **Hold ALT + Left Click** control the camera
 5. Using **Scroll up/down** control the camera zoom in/out
 
 ## TODO
