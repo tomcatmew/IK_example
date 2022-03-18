@@ -1,6 +1,7 @@
 # IK_example (CCD Jacobian FABRIK)
 
 Practice for some popular IK implemntaion in OpenGL 2.0 
+**Make sure you build in Release Mode**
 
 My personal feeling of speed&performance for different IK methods
 
