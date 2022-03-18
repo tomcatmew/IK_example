@@ -53,10 +53,12 @@ Constraints are on first 3 joints. **Green** joint only can rotate along **local
 **Red** joints only can rotate along **local X axis**, with constraint of Euler degree between **-90 , +90 degrees**. \
 All IK implementation using a custom 3D struct built by myself \
 No external library for 3D object \
+<br />
 ![title](thumbnail.gif)
 
 # Skeleton IK (1_skeleton_ik)
 Applying the CCD IK on rig bones \
+<br />
 ![title](ik_skeleton.gif)
 
 # Jacobian Transpose (2_ik_jacobian)
@@ -72,9 +74,11 @@ e = end effector position
 r = joint position
 ```
 **I set a small number of maxmium iteration per frame, so you can clearly see how the joints moving with slow speed**
+<br />
 ![jacobian](ik_jacobian.gif)
 
 # FABRIK (3_FABRIK)
 **No constraints applied** \
+<br />
 ![fabrik](fabrik1.gif) \
 *Practice for some popular IK implemntaion in OpenGL 2.0 Copyright Yifei Chen*
