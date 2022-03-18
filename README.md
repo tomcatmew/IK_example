@@ -49,7 +49,8 @@ My favorite one would be the FABRIK one 👍
 
 
 # CCD IK with Constraints(0_ikccd)
-Constraints are on first 3 joints. **Green** joint only can rotate along **local Y axis**, **Red** joints only can rotate along **local X axis**, with Euler degree constraint of **-90,90 degrees**. \
+Constraints are on first 3 joints. **Green** joint only can rotate along **local Y axis**,\
+**Red** joints only can rotate along **local X axis**, with constraint of Euler degree between **-90 , +90 degrees**. \
 All IK implementation using a custom 3D struct built by myself \
 No external library for 3D object \
 ![title](thumbnail.gif)
