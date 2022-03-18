@@ -64,7 +64,7 @@ Applying the CCD IK on rig bones \
 # Jacobian Transpose (2_ik_jacobian)
 Using Jacobian Transpose and analytical method to compute the Jacobian\
 Currently it only rotates along Z axis, I'm working on adding X and Y axis rotation\
-In 2D case, every bone's rotation axis is just Z axis, but in 3D case the 3 rotation axis will change based on parent's bone\
+In 2D case, every bone's rotation axis is always the Z axis (0,0,1), but in 3D case each bone's rotation axis will change based on parent's bone\
 **Analytical method formula**<br /><br />
 <img src="https://render.githubusercontent.com/render/math?math=J=\alpha_i \times (e-r_i)">
 ```
