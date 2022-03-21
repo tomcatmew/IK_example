@@ -9,7 +9,7 @@ My personal feeling of speed&performance for different IK methods
 <b>Fast</b> ←------------------------→ <b>Performance</b> 
 CCD            FABRIK           Jacobian
 
-My favorite one would be the FABRIK one 👍
+My favorite one would be the FABRIK one
 </pre>
 
 - [Top](#ik_example-ccd-jacobian-fabrik)
