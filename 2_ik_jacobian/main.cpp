@@ -28,6 +28,8 @@
 namespace dfm2 = delfem2;
 using namespace std::this_thread; // sleep_for, sleep_until
 using namespace std::chrono;
+
+
 void SeparateYRot(
     double qy[4],
     double qxz[4],
@@ -411,6 +413,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
+// find angle (quaternion) between 2 vectors 
 dfm2::CQuatd qfv(dfm2::CVec3d& u, dfm2::CVec3d& v)
 {
     // a concise version of q from 2 vectors
@@ -422,54 +425,6 @@ dfm2::CQuatd qfv(dfm2::CVec3d& u, dfm2::CVec3d& v)
     cross = s * cross;
     return dfm2::CQuatd(k * s, cross.x, cross.y, cross.z);
 }
-
-
-dfm2::CQuatd quatfromtwovectors(dfm2::CVec3d& u, dfm2::CVec3d& v)
-{
-    u.normalize();
-    v.normalize();
-    float norm_u_norm_v = sqrt(u.norm() * v.norm());
-    float real_part = norm_u_norm_v + u.dot(v);
-
-    dfm2::CVec3d w;
-    if (real_part < 1.e-6f * norm_u_norm_v) {
-        /* If u and v are exactly opposite, rotate 180 degrees
-         * around an arbitrary orthogonal axis. Axis normalisation
-         * can happen later, when we normalise the quaternion. */
-        real_part = 0.0f;
-        w = abs(u.x) > abs(u.z) ? dfm2::CVec3d(-u.y, u.x, 0.f)
-            : dfm2::CVec3d(0.f, -u.z, u.y);
-    }
-    else {
-        /* Otherwise, build quaternion the standard way. */
-        w = u.cross(v);
-    }
-
-    return dfm2::CQuatd(real_part, w.x, w.y, w.z);
-}
-
-
-dfm2::CQuatd old_quatfromtwovectors(dfm2::CVec3d& u, dfm2::CVec3d& v)
-{
-    u.normalize();
-    v.normalize();
-    double dot = u.dot(v);
-    dfm2::CVec3d axis = u.cross(v);
-    double axis_norm = axis.norm();
-    axis = axis / axis_norm;
-    //printf("x: %f\n", dot);
-    //printf("y: %f\n", axis_norm);
-    double angle_a = atan(axis_norm / dot);
-    //double angle_a = atan2(axis_norm, dot);
-    //printf("Angle: %f\n", angle_a);
-    dfm2::CQuatd result{ cos(angle_a / 2), axis.x * sin(angle_a / 2) ,axis.y * sin(angle_a / 2) ,axis.z * sin(angle_a / 2) };
-    return result;
-
-}
-
-
-
-
 
 // =======================================
 int main(int argc, char* argv[]) {
@@ -628,12 +583,11 @@ int main(int argc, char* argv[]) {
         dfm2::CVec3d distance_eg = target - old_end;
 
         unsigned int count = 0;
-        //  currently I let it iterate 200 times, I should check the distance and stop the loop when target is close enough
-        // but I failed to use the distance stop the loop, I may mess up some parts. 
+        //  currently I let it iterate 200 times, I should check the distance and stop the loop when target is close enough 
         while (count < 50)
         {
             // iterate through 3 axis, Z, Y ,X
-            // currently only works for Z axis, for 3 axis I need to change axis based on the parent's bone, I haven't finish yet 
+            // currently only works for Z axis (2D jacobian IK), for 3 axis I need to change axis based on the parent's bone, I haven't finish yet 
             for (unsigned int i = 0; i < 1; i++)
             {
                 //get end effector pos
@@ -735,7 +689,7 @@ int main(int argc, char* argv[]) {
         draw_target(target);
         draw_coordinate();
         dis_vector.clear();
-        for (unsigned int i = 1; i < 5; i++)
+        for (unsigned int i = 1; i < all_easy_bone.size(); i++)
         {
             dfm2::CVec3d disv = all_easy_bone[i].globalpos() - all_easy_bone[i - 1].globalpos();
             double dis = disv.norm();
@@ -901,7 +855,7 @@ int main(int argc, char* argv[]) {
             ImGui::NewLine();
             ImGui::Separator();
             ImGui::NewLine();
-            ImGui::Text("Length of Bone - 0: %f ; 1: %f ; 3: %f ; 4: %f", dis_vector[0], dis_vector[1], dis_vector[2], dis_vector[3]);
+            ImGui::Text("Length of Bone - 0: %f ; 1: %f ; 3: %f", dis_vector[0], dis_vector[1], dis_vector[2]);
             ImGui::NewLine();
             ImGui::Text("Target Position - X: %f ; Y : %f, Z: %f", target.x, target.y, target.z);
             ImGui::Separator();
