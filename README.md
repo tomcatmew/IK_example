@@ -3,13 +3,12 @@
 Practice for some popular IK implemntaion in OpenGL 2.0 \
 **Make sure you build in Release Mode**
 
-My personal feeling of speed&performance for different IK methods
-
+My understanding of speed&performance for different IK methods
+May be different based on how many joints you have
 <pre>
 <b>Fast</b> ←------------------------→ <b>Performance</b> 
 CCD            FABRIK           Jacobian
 
-My favorite one would be the FABRIK one
 </pre>
 
 - [Top](#ik_example-ccd-jacobian-fabrik)
