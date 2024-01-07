@@ -59,7 +59,7 @@ No external library for 3D object \
 
 Applying the CCD IK on rig bones 
 
-Local to world coordinates. The dfm2::CRigBone is the bone structure developed by Prof.Umetani. We must be careful when dealing with the IK in world space because we must convert the rotation to local space. 
+**Local to world coordinates.** The dfm2::CRigBone is the bone structure developed by Prof.Umetani. We must be careful when dealing with the IK in world space because we must convert the rotation to local space. 
 
 By using quaternion, the process will be straightforward to compute. 
 
