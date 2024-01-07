@@ -63,7 +63,7 @@ Local to world coordinates. The dfm2::CRigBone is the bone structure developed b
 
 By using quaternion, the process will be straightforward to compute. 
 
-$\q_{local} = \q_{parent}\(\q_{increment}\q_{world}\)$
+$q_{local} = q^{\*}_{parent}\(q_{increment}q_{world}\)$
 
 <br />
 ![title](ik_skeleton.gif)
