@@ -66,6 +66,7 @@ By using quaternion, the process will be straightforward to compute.
 $q_{local} = q_{parent}^{\*}\(q_{increment}q_{world}\)$
 
 <br />
+
 ![title](ik_skeleton.gif)
 
 # Jacobian Transpose (2_ik_jacobian)
