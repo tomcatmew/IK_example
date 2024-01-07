@@ -56,7 +56,15 @@ No external library for 3D object \
 ![title](thumbnail.gif)
 
 # Skeleton IK (1_skeleton_ik)
-Applying the CCD IK on rig bones \
+
+Applying the CCD IK on rig bones 
+
+Local to world coordinates. The dfm2::CRigBone is the bone structure developed by Prof.Umetani. We must be careful when dealing with the IK in world space because we must convert the rotation to local space. 
+
+By using quaternion, the process will be straightforward to compute. 
+
+$\q_{local} = \q^{\*}_{parent\(\q_{increment\q_{world}}\)}$
+
 <br />
 ![title](ik_skeleton.gif)
 
